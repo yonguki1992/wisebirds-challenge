@@ -1,6 +1,5 @@
 <script setup>
 import {nextTick, reactive, ref, toRefs, watch} from 'vue';
-import {fetchClient} from '@/utils/http/fetchClient.js';
 import {errorHandler, isValidValue, useDebounceTask} from '@/utils/functions/useJsUtils.js';
 import {
   USERS_ERROR_CONFIRM_PASSWORD_EMPTY_LABEL,
@@ -22,6 +21,7 @@ import {useAuthStore} from '@/store/modules/useAuthStore.js';
 import {storeToRefs} from 'pinia';
 import {ResultWrapperFactory} from '@/utils/factory/ResultWrapperFactory.js';
 import {PAGE_PERMISSION_DENIED, SESSION_OVER} from '@/constants/commonConstants.js';
+import { useFetchClient } from "@/composables/useFetchClient.js";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -95,7 +95,7 @@ const onInputAndValidateEmail = (event) => {
   checkExistsEmail(targetValue);
 };
 
-const checkExistsEmail = useDebounceTask(async (email) => {
+const checkExistsEmail = useDebounceTask((email) => {
   if (!isValidValue(email)) {
     errors.value.userId = '';
     return;
@@ -104,20 +104,23 @@ const checkExistsEmail = useDebounceTask(async (email) => {
     errors.value.userId = USERS_ERROR_EMAIL_INVALID_LABEL;
     return;
   }
-  await fetchClient(`/api/users/${email}/exists`, { method: 'GET' })
-    .then((res) => {
-      console.log("res :>> ", res);
-      if (!res.result) {
+  return useFetchClient(`/api/users/${email}/exists`, {
+    method: 'GET',
+    immediate: true,
+    onResponse: ({ data }) => {
+      if (!data.value.result) {
         errors.value.userId = '';
         return;
       }
       errors.value.userId = USERS_ERROR_EMAIL_ALREADY_EXISTS_LABEL;
-    }).catch((err) => {
+    },
+    onError: () => {
       nextTick(() => {
         // 포커스를 쥐고 있을테니 풀어줌
         formRefs.userIdRef.blur();
       });
-    });
+    }
+  });
 }, 300);
 
 

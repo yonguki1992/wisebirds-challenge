@@ -2,11 +2,9 @@
 import {onMounted, reactive, ref, toRefs, watch} from 'vue';
 import GridTable from '@/components/organisms/table/GridTable.vue';
 import {getDateFormat} from '@/utils/functions/useJsUtils.js';
-import {fetchClient} from '@/utils/http/fetchClient.js';
-import {ResultWrapperFactory} from '@/utils/factory/ResultWrapperFactory.js';
 import UserManageModal from '@/components/pages/admin/user/components/organisms/modal/UserManageModal.vue';
 import {useGlobalModalStore} from '@/store/modules/useGlobalModalStore.js';
-import {useConcurrentTasks} from '@/composables/useConcurrentTasks.js';
+import { useFetchClient } from "@/composables/useFetchClient.js";
 
 const tableConfigs = [
   // 아이디
@@ -36,22 +34,27 @@ const state = reactive({
 const { list, pagingInfo } = toRefs(state);
 
 
-const fetchUsers = () => {
-  return fetchClient('/api/users', {
-    method: 'GET',
-    params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
-  }).then((res) => {
-    const {content, total_elements} = res;
+const {
+  execute: fetchUsers,
+} = useFetchClient('/api/users', {
+  method: 'GET',
+  params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
+  onResponse: ({ data }) => {
+    const {content, total_elements} = data.value;
     state.list = content;
     state.pagingInfo = {
       ...state.pagingInfo,
       totalElements: total_elements,
     };
-    return ResultWrapperFactory.create({ result: true, data: res });
+  }
+})
+const isLoading = ref(false);
+const fetchUsersWithLoading = () => {
+  isLoading.value = true;
+  return fetchUsers().finally(() => {
+    isLoading.value = false;
   });
 };
-const isLoading = ref(false);
-const fetchUsersConcurrent = useConcurrentTasks(fetchUsers, isLoading);
 
 /**
  *  @typedef {{
@@ -90,41 +93,38 @@ watch(isSubmitting, (newVal) => newVal ? openLoadingSpinner() : closeLoadingSpin
 
 /**
  *  유저 신규 등록
- *  @type {
- *    function(SubmitUserReqBody): Promise<Type.ResultWrapper<{ data: * }|{errors: {key?: string, message?: string}[]}>>
- *  }
+ *  @param {SubmitUserReqBody} payload
  */
-const submitUser = useConcurrentTasks(async (payload) => {
-  return fetchClient('/api/users', { method: 'POST', body: payload }).then((res) => {
-    console.log("res :>> ", res);
-    if (res.result) {
-      return ResultWrapperFactory.create({ result: true });
-    }
-    return ResultWrapperFactory.create();
-  }).catch((err) => {
-    console.log("err :>> ", err);
-    return ResultWrapperFactory.create({ error: err });
-  }).finally(fetchUsers);
-}, isSubmitting);
+const submitUser = async (payload) => {
+  return useFetchClient('/api/users', {
+    method: 'POST',
+    body: payload,
+    immediate: true,
+    onPreFetch: () => isSubmitting.value = true,
+    onFinally: () => {
+      isSubmitting.value = false;
+      fetchUsers();
+    },
+  });
+  }
 /**
  *  유저 수정
- *  @type {
- *    function(SubmitUserReqBody): Promise<Type.ResultWrapper<{ data: * }|{errors: {key?: string, message?: string}[]}>>
- *  }
+ *  @param {SubmitUserReqBody} payload
  */
-const patchUser = useConcurrentTasks(async (payload) => {
+const patchUser = async (payload) => {
   const { id, ...body } = payload;
-  return fetchClient(`/api/campaigns/${id}`, { method: 'PATCH', body }).then((res) => {
-    console.log("res :>> ", res);
-    if (res.result) {
-      return ResultWrapperFactory.create({ result: true });
+
+  return useFetchClient(`/api/campaigns/${id}`, {
+    method: 'PATCH',
+    body,
+    immediate: true,
+    onPreFetch: () => isSubmitting.value = true,
+    onFinally: () => {
+      isSubmitting.value = false;
+      fetchUsers();
     }
-    return ResultWrapperFactory.create();
-  }).catch((err) => {
-    console.log("err :>> ", err);
-    return ResultWrapperFactory.create({ error: err });
-  }).finally(fetchUsers);
-}, isSubmitting);
+  })
+};
 const onUserManageModalSubmit = async (payload) => {
   if (!['create', 'edit'].includes(userManageModalState.type)) {
     return;
@@ -137,7 +137,7 @@ const onUserManageModalSubmit = async (payload) => {
 }
 
 onMounted(() => {
-  fetchUsersConcurrent();
+  fetchUsersWithLoading();
 });
 </script>
 <template>

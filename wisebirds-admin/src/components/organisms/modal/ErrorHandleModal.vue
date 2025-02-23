@@ -15,7 +15,7 @@ const closeModal = () => {
 <template>
   <!-- 배경 마스크 -->
   <div
-    v-if="show"
+    v-show="show"
     class="error-modal-mask"
     @click.self="closeModal"
   >

@@ -1,6 +1,5 @@
 <script setup>
 import {nextTick, onMounted, reactive, ref, toRefs, watch} from 'vue';
-import {fetchClient} from '@/utils/http/fetchClient.js';
 import {
   errorHandler,
   isValidValue,
@@ -16,7 +15,7 @@ import {PAGE_PERMISSION_DENIED, PERMISSIONS_CODE, SESSION_OVER} from '@/constant
 import {useRouter} from 'vue-router';
 import {useGlobalModalStore} from '@/store/modules/useGlobalModalStore.js';
 import {useOptionByValue} from '@/composables/useOptionByValue.js';
-import {useConcurrentTasks} from '@/composables/useConcurrentTasks.js';
+import { useFetchClient } from "@/composables/useFetchClient.js";
 
 const router = useRouter();
 
@@ -91,28 +90,50 @@ const tableConfigs = [
   },
 ];
 
-const fetchCampaigns = () => {
-  return fetchClient('/api/campaigns', {
-    method: 'GET',
-    params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
-  }).then((res) => {
-    const {content, total_elements} = res;
+// const fetchCampaigns = () => {
+//   return fetchClient('/api/campaigns', {
+//     method: 'GET',
+//     params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
+//   }).then((res) => {
+//     const {content, total_elements} = res;
+//     state.list = content;
+//     state.pagingInfo = {
+//       ...state.pagingInfo,
+//       totalElements: total_elements,
+//     };
+//     return ResultWrapperFactory.create({ result: true, data: res });
+//   });
+// };
+
+const {
+  execute: fetchCampaigns,
+} = useFetchClient('/api/campaigns', {
+  method: 'GET',
+  params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
+  onResponse: ({ data }) => {
+    const {content, total_elements} = data.value;
     state.list = content;
     state.pagingInfo = {
       ...state.pagingInfo,
       totalElements: total_elements,
     };
-    return ResultWrapperFactory.create({ result: true, data: res });
-  });
-};
+  }
+});
+
 const isLoading = ref(false);
-const fetchCampaignsConcurrent = useConcurrentTasks(fetchCampaigns, isLoading);
+// const fetchCampaignsConcurrent = useConcurrentTasks(fetchCampaigns, isLoading);
+const fetchCampaignsWithLoading = () => {
+  isLoading.value = true;
+  return fetchCampaigns().finally(() => {
+    isLoading.value = false;
+  })
+};
 const onPageChange = (pageNum) => {
   state.pagingInfo = {
     ...state.pagingInfo,
     page: pageNum,
   };
-  return fetchCampaignsConcurrent();
+  return fetchCampaignsWithLoading();
 }
 
 const onEnabledChange = (event, rowIndex) => {
@@ -140,7 +161,7 @@ const { openLoadingSpinner, closeLoadingSpinner } = useGlobalModalStore();
 const isSubmitting = ref(false);
 watch(isSubmitting, (newVal) => newVal ? openLoadingSpinner() : closeLoadingSpinner());
 
-const patchCampaign = useConcurrentTasks(async ({ rowIndex, enabled }) => {
+const patchCampaign = async ({ rowIndex, enabled }) => {
   const { id } = state.list[rowIndex];
   // 0. 사용자 인증 풀렸는지.
   if (!isAuthenticated.value) {
@@ -159,24 +180,18 @@ const patchCampaign = useConcurrentTasks(async ({ rowIndex, enabled }) => {
     await errorHandler(validateRes.errors[0].message);
     return validateRes;
   }
-  
-  return fetchClient(`/api/campaigns/${id}`, {
+
+  return useFetchClient(`/api/campaigns/${id}`, {
     method: 'PATCH',
     body: { enabled },
-  }).then((res) => {
-    if (res.result) {
-      return ResultWrapperFactory.create({ result: true });
-    }
-    return ResultWrapperFactory.create();
-  }).catch((err) => {
-    console.log("err :>> ", err);
-    // 에러메시지
-    return ResultWrapperFactory.create({ error: err });
+    immediate: true,
+    onPreFetch: () => isSubmitting.value = true,
+    onFinally: () => isSubmitting.value = false,
   });
-}, isSubmitting);
+};
 
 onMounted(() => {
-  fetchCampaignsConcurrent();
+  fetchCampaignsWithLoading();
 });
 </script>
 <template>
