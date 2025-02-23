@@ -227,6 +227,7 @@ select {
     display: inline-block;
     width: 180px;
     min-width: 150px;
+    border-radius: 8px;
     color: var(--select-font-color);
 }
 

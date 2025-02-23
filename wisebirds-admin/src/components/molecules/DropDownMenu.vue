@@ -6,10 +6,11 @@ const props = defineProps({
   options: { type: Array, required: false, default: () => [] },
   value: { type: String, required: false, default: '' },
   modelValue: { type: String, required: false, default: '' },
+  disabled: { type: Boolean, required: false, default: false },
 });
 
 const emits = defineEmits([ 'update:modelValue', 'change', 'ready' ]);
-const { options } = toRefs(props);
+const { options, disabled } = toRefs(props);
 const selection = computed({
   get: () => props.value || props.modelValue,
   set: (value) => emits('update:modelValue', value),
@@ -24,7 +25,12 @@ const onOptionChange = (opt) => {
 };
 
 const isOpen = ref(false); // select가 열린 상태 감지
-const toggleDropdown = () => isOpen.value = !isOpen.value;
+const toggleDropdown = () => {
+  if (disabled.value) {
+    return;
+  }
+  isOpen.value = !isOpen.value;
+}
 const closeDropdown = () => isOpen.value = false;
 const selectRef = ref();
 onMounted(() => {
@@ -41,7 +47,11 @@ onMounted(() => {
       class="container-mask"
       @click="closeDropdown()"
     ></div>
-    <div class="base-select-selected" @click="toggleDropdown">
+    <div
+      class="base-select-selected"
+      :class="{ disabled: disabled }"
+      @click="toggleDropdown"
+    >
       <span>{{ selectedItem.name }}</span>
       <span class="base-select-arrow"></span>
     </div>
@@ -60,4 +70,10 @@ onMounted(() => {
     </transition>
   </div>
 </template>
-<style scoped></style>
+<style scoped>
+.disabled {
+  border-radius: 8px;
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+</style>

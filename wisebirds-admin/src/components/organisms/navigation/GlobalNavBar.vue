@@ -10,7 +10,7 @@ import {useRouter} from 'vue-router';
 
 const router = useRouter();
 const authStore = useAuthStore();
-const { userAuth, permission } = storeToRefs(authStore);
+const { userAuth, permission, isAuthenticated } = storeToRefs(authStore);
 
 const roleOptions = deepFreeze(
   /** @type {Type.ItemOption<Type.Permission, Type.EmptyObject>[]} */
@@ -55,6 +55,7 @@ watch(permission, () => {
 
     <div class="user-info">
       <popover-profile
+        v-if="isAuthenticated"
         :key="userAuth.id"
         style="margin-right: 20px"
       >
@@ -70,9 +71,9 @@ watch(permission, () => {
         </template>
       </popover-profile>
       <drop-down-menu
-        class="base-select-container"
         id="role-select"
         :options="roleOptions"
+        :disabled="!isAuthenticated"
         :value="userAuth.permission"
         @change="authStore.setPermission($event.value)"
       />
