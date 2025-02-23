@@ -1,5 +1,3 @@
-import {useGlobalModalStore} from '@/store/modules/useGlobalModalStore.js';
-
 const isProduction = import.meta.env.MODE === 'production';
 const protocol = isProduction ? 'https://' : 'http://';
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -51,14 +49,12 @@ export function requestInterceptor(url, config) {
  *  @throws {Error} - 요청이 실패했을 경우
  */
 export async function responseInterceptor(response) {
-  const { openErrorModal } = useGlobalModalStore();
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
     const error = new Error(response.statusText);
     error.status = response.status;
     error.data = errorData;
-    // 에러메시지 공통 처리
-    openErrorModal();
+
     throw error;
   }
   

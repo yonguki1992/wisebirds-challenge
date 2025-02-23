@@ -2,7 +2,6 @@ import { createWebHistory, createRouter } from 'vue-router';
 import {useAuthStore} from '@/store/modules/useAuthStore.js';
 import {PAGE_PERMISSION_DENIED, PERMISSIONS_CODE} from '@/constants/commonConstants.js';
 import {errorHandler} from '@/utils/functions/useJsUtils.js';
-import { useGlobalModalStore } from "@/store/modules/useGlobalModalStore.js";
 
 const checkPermission = (to, from, next) => {
   const authStore = useAuthStore();
@@ -11,7 +10,7 @@ const checkPermission = (to, from, next) => {
     return;
   }
   errorHandler(PAGE_PERMISSION_DENIED);
-  next(false);
+  next('/');
 }
 
 const router = createRouter({
@@ -30,6 +29,10 @@ const router = createRouter({
       component: () => import('@/components/templates/AppMainLayout.vue'),
       children: [
         {
+          path: '',
+          redirect: '/admin/campaigns/main',
+        },
+        {
           path: 'admin/campaigns/main',
           component: () => import('@/components/pages/admin/campaign/CampaignMain.vue'),
           meta: { title: '캠페인' }
@@ -46,16 +49,6 @@ const router = createRouter({
 });
 
 router.beforeEach(async(to, from, next) => {
-  const authStore = useAuthStore();
-  const { openErrorModal } = useGlobalModalStore();
-  try {
-    if (!authStore.isAuthenticated) {
-      await authStore.fetchUserAuth();
-    }
-  } catch (error) {
-    console.error(error);
-    openErrorModal();
-  }
   next();
 });
 
