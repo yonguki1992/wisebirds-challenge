@@ -34,20 +34,21 @@ const state = reactive({
 const { list, pagingInfo } = toRefs(state);
 
 
-const {
-  execute: fetchUsers,
-} = useFetchClient('/api/users', {
-  method: 'GET',
-  params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
-  onResponse: ({ data }) => {
-    const {content, total_elements} = data.value;
-    state.list = content;
-    state.pagingInfo = {
-      ...state.pagingInfo,
-      totalElements: total_elements,
-    };
-  }
-})
+const fetchUsers = () => {
+  return useFetchClient('/api/users', {
+    method: 'GET',
+    params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
+    immediate: true,
+    onResponse: ({ data }) => {
+      const {content, total_elements} = data.value;
+      state.list = content;
+      state.pagingInfo = {
+        ...state.pagingInfo,
+        totalElements: total_elements,
+      };
+    }
+  });
+}
 const isLoading = ref(false);
 const fetchUsersWithLoading = () => {
   isLoading.value = true;
@@ -55,7 +56,13 @@ const fetchUsersWithLoading = () => {
     isLoading.value = false;
   });
 };
-
+const onPageChange = (pageNum) => {
+  state.pagingInfo = {
+    ...state.pagingInfo,
+    page: pageNum,
+  };
+  return fetchUsersWithLoading();
+}
 /**
  *  @typedef {{
  *    name: string,
@@ -161,6 +168,7 @@ onMounted(() => {
       :table-configs="tableConfigs"
       :list="list"
       :paging-info="pagingInfo"
+      @page-change="onPageChange"
     >
       <template #edit="{ rowIndex, tableRow }">
         <base-button

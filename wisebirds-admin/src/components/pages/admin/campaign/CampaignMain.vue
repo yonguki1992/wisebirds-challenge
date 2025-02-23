@@ -105,20 +105,21 @@ const tableConfigs = [
 //   });
 // };
 
-const {
-  execute: fetchCampaigns,
-} = useFetchClient('/api/campaigns', {
-  method: 'GET',
-  params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
-  onResponse: ({ data }) => {
-    const {content, total_elements} = data.value;
-    state.list = content;
-    state.pagingInfo = {
-      ...state.pagingInfo,
-      totalElements: total_elements,
-    };
-  }
-});
+const fetchCampaigns = () => {
+  return useFetchClient('/api/campaigns', {
+    method: 'GET',
+    params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
+    immediate: true,
+    onResponse: ({ data }) => {
+      const {content, total_elements} = data.value;
+      state.list = content;
+      state.pagingInfo = {
+        ...state.pagingInfo,
+        totalElements: total_elements,
+      };
+    }
+  });
+};
 
 const isLoading = ref(false);
 // const fetchCampaignsConcurrent = useConcurrentTasks(fetchCampaigns, isLoading);
