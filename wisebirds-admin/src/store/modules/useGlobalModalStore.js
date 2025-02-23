@@ -2,7 +2,7 @@ import {defineStore} from 'pinia';
 import {computed, reactive, ref} from 'vue';
 import {COMMON_ERROR_MESSAGE} from '@/constants/commonConstants.js';
 
-export const useGlobalModalStore = defineStore('error-modal', () => {
+export const useGlobalModalStore = defineStore('global-modal', () => {
   
   const errorModalState = reactive({
     message: COMMON_ERROR_MESSAGE,
