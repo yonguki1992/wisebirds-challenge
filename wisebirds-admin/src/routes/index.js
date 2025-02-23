@@ -2,6 +2,7 @@ import { createWebHistory, createRouter } from 'vue-router';
 import {useAuthStore} from '@/store/modules/useAuthStore.js';
 import {PAGE_PERMISSION_DENIED, PERMISSIONS_CODE} from '@/constants/commonConstants.js';
 import {errorHandler} from '@/utils/functions/useJsUtils.js';
+import { useGlobalModalStore } from "@/store/modules/useGlobalModalStore.js";
 
 const checkPermission = (to, from, next) => {
   const authStore = useAuthStore();
@@ -46,13 +47,14 @@ const router = createRouter({
 
 router.beforeEach(async(to, from, next) => {
   const authStore = useAuthStore();
+  const { openErrorModal } = useGlobalModalStore();
   try {
     if (!authStore.isAuthenticated) {
       await authStore.fetchUserAuth();
     }
   } catch (error) {
     console.error(error);
-
+    openErrorModal();
   }
   next();
 });
