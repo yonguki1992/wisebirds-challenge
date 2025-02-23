@@ -22,6 +22,7 @@ import {storeToRefs} from 'pinia';
 import {ResultWrapperFactory} from '@/utils/factory/ResultWrapperFactory.js';
 import {PAGE_PERMISSION_DENIED, SESSION_OVER} from '@/constants/commonConstants.js';
 import { useFetchClient } from "@/composables/useFetchClient.js";
+import BaseButton from "@/components/atoms/BaseButton.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -277,6 +278,7 @@ const closeModal = () => {
               <base-button
                 type="button"
                 class="toggle-btn"
+                :tabindex="-1"
                 @click="togglePasswordVisibility('password')"
               >
                 <font-awesome-icon :icon="['fas', `eye${isPasswordVisible ? '' : '-slash'}`]" />
@@ -307,9 +309,14 @@ const closeModal = () => {
                 placeholder="비밀번호 확인"
                 @ready="onInputReady($event, 'confirmPassword')"
               />
-              <button type="button" class="toggle-btn" @click="togglePasswordVisibility('confirmPassword')">
+              <base-button
+                type="button"
+                class="toggle-btn"
+                :tabindex="-1"
+                @click="togglePasswordVisibility('confirmPassword')"
+              >
                 <font-awesome-icon :icon="['fas', `eye${isConfirmPasswordVisible ? '' : '-slash'}`]" />
-              </button>
+              </base-button>
             </div>
             <div class="error-tooltip">
               <p
