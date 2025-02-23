@@ -1,0 +1,45 @@
+:root {
+    --main-bg-color: #f8f9fa;
+
+    --cmn-font-color: white;
+    --cmn-font-black: #333;
+
+    --cmn-container-bg-color: #3585ea;
+    --cmn-btn-bg-color: #3585ea;
+
+    /* gnb */
+    --gnb-bg-color: #3589f3;
+    --gnb-font-color: white;
+
+    --card-container-bg-color: white;
+
+    /* table */
+    --table-container-bg-color: white;
+    --table-header-bg-color: #f5f5f5;
+    --table-header-font-color: #333333;
+
+    /* pagination */
+    --pagination-bg-color: #3585ea;
+    --pagination-hover-color: #6ea8ee;
+    --pagination-active-color: #1274f3;
+
+    /* select box */
+    --select-font-color: #333333;
+    --select-selected-bg-color: white;
+    --select-hover-color: #f1f1f1;
+    --select-menu-bg-color: white;
+
+    --select-menu-li-hover-color: #a9c5c6;
+    --select-menu-li-hover-font-color: #075acc;
+
+    --select-menu-active-color: #a9c5c6;
+    --select-menu-active-font-color: #0347a8;
+
+    /* popover */
+    --popover-bg-color: white;
+    --popover-font-color: #333333FF;
+
+    /* toggle switch */
+    --toggle-off-bg-color: white;
+    --toggle-on-bg-color: #3585ea;
+}

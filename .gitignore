@@ -128,3 +128,16 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/vcs.xml
+/fake-api/.idea/.gitignore
+/fake-api/.idea/compiler.xml
+/fake-api/.idea/fakeAPI.iml
+/fake-api/.idea/git_toolbox_blame.xml
+/fake-api/.idea/jsLibraryMappings.xml
+/fake-api/.idea/modules.xml
+/recruit-challenge/.vscode/extensions.json
+/.idea/git_toolbox_blame.xml
+/.idea/modules.xml
+/.idea/wisebirds-challenge.iml

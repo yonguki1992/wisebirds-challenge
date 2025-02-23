@@ -1,0 +1,92 @@
+
+/* vue 트랜지션 */
+.bounce-enter-active {
+    animation: bounce-in 0.5s;
+}
+.bounce-leave-active {
+    animation: bounce-in 0.5s reverse;
+}
+@keyframes bounce-in {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.fade-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-enter-to {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-leave-from {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+    transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateX(20px);
+    opacity: 0;
+}
+
+/* 드롭다운 애니메이션 (펼쳐짐 & 사라짐) */
+.dropdown-enter-active,
+.dropdown-leave-active {
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    transform-origin: top;
+}
+
+/* 🔹 처음 시작 상태 (완전히 접힌 상태) */
+.dropdown-enter-from {
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+/* 🔹 펼쳐진 상태 (보이는 상태) */
+.dropdown-enter-to {
+    transform: scaleY(1);
+    opacity: 1;
+}
+
+/* 🔹 제거될 때 (다시 접히는 상태) */
+.dropdown-leave-from {
+    transform: scaleY(1);
+    opacity: 1;
+}
+
+/* 🔹 제거 완료 후 (완전히 사라짐) */
+.dropdown-leave-to {
+    transform: scaleY(0);
+    opacity: 0;
+}
+
