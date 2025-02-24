@@ -116,12 +116,12 @@ const submitUser = async (payload) => {
   }
 /**
  *  유저 수정
- *  @param {SubmitUserReqBody} payload
+ *  @param {PatchUserReqBody} payload
  */
 const patchUser = async (payload) => {
   const { id, ...body } = payload;
 
-  return useFetchClient(`/api/campaigns/${id}`, {
+  return useFetchClient(`/api/users/${id}`, {
     method: 'PATCH',
     body,
     immediate: true,
