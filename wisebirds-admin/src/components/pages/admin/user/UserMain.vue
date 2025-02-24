@@ -78,15 +78,10 @@ const onPageChange = (pageNum) => {
   return fetchUsersWithLoading();
 }
 /**
- *  @typedef {{
- *    name: string,
- *    email: string,
- *    password: string,
- *    repeat_password: string
- *  }} SubmitUserReqBody
+ *  @typedef {{ userId: string, name: string, password: string, confirmPassword: string }} SubmitUserReqBody
  */
 /**
- *  @typedef {{ userId: number, name: string }} PatchUserReqBody
+ *  @typedef {Pick<SubmitUserReqBody, 'userId'|'name'>} PatchUserReqBody
  */
 
 const userManageModalState = reactive({
@@ -146,6 +141,11 @@ const patchUser = async (payload) => {
     }
   })
 };
+
+/**
+ *  유저 수정/신규 등록
+ *  @param {SubmitUserReqBody|PatchUserReqBody} payload
+ */
 const onUserManageModalSubmit = async (payload) => {
   if (!['create', 'edit'].includes(userManageModalState.type)) {
     return;
