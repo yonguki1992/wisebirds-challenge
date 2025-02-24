@@ -154,7 +154,11 @@ const onUserManageModalSubmit = async (payload) => {
     userManageModalState.type === 'create'
       ? submitUser(payload)
       : patchUser(payload)
-  ).then(closeUserManageModal);
+  ).then((res) => {
+    if (res.result) {
+      closeUserManageModal();
+    }
+  });
 }
 
 onMounted(() => {
