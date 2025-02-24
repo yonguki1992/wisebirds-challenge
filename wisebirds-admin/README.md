@@ -48,7 +48,7 @@ npm run build
 │   ├── store/              # 전역 스토어(VUE Pinia)
 │   ├── types/              # JS Doc 타입 정의
 │   ├── utils/              # 공통적인 유틸리티 함수 및 헬퍼
-│   └── App.js              # 애플리케이션 진입점
+│   └── main.js              # 애플리케이션 진입점
 └── package.json            # 프로젝트 의존성 및 스크립트
 ```
 
