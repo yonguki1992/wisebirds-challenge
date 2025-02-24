@@ -4,7 +4,7 @@ import {
   errorHandler,
   isValidValue,
   safeEncodeURIComponent,
-  useDebounceTask
+  useDebounceTask, useFilteringPayload
 } from '@/utils/functions/useJsUtils.js';
 import {
   USERS_ERROR_CONFIRM_PASSWORD_EMPTY_LABEL,
@@ -222,7 +222,7 @@ const onSubmit = () => {
   if (!validateForm().result) {
     return;
   }
-  emits('submit', { ...form.value });
+  emits('submit', useFilteringPayload({ ...form.value }));
 };
 
 const togglePasswordVisibility = (field) => {

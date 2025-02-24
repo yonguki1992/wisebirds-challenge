@@ -112,9 +112,15 @@ watch(isSubmitting, (newVal) => newVal ? openLoadingSpinner() : closeLoadingSpin
  *  @param {SubmitUserReqBody} payload
  */
 const submitUser = async (payload) => {
+  const {
+    name,
+    userId: email,
+    password,
+    confirmPassword: repeat_password,
+  } = payload;
   return useFetchClient('/api/users', {
     method: 'POST',
-    body: payload,
+    body: { name, email, password, repeat_password },
     immediate: true,
     onPreFetch: () => isSubmitting.value = true,
     onFinally: () => {
@@ -129,7 +135,6 @@ const submitUser = async (payload) => {
  */
 const patchUser = async (payload) => {
   const { userId: id, ...body } = payload;
-
   return useFetchClient(`/api/users/${safeEncodeURIComponent(id)}`, {
     method: 'PATCH',
     body,
