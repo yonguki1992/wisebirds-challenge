@@ -1,7 +1,7 @@
 # Fake API
 
 ## 개요
-이 프로젝트는 `json-server`를 활용한 가짜 API 서버입니다. `json-server-auth`를 추가하여 인증 기능을 제공하며, `connect-pause`를 사용하여 응답 지연을 설정할 수 있습니다.
+이 프로젝트는 `json-server`를 활용한 가짜 API 서버입니다. `connect-pause`를 사용하여 응답 지연을 설정할 수 있습니다.
 
 ## 주요 기능
 - **JSON 기반의 간단한 REST API 서버**
