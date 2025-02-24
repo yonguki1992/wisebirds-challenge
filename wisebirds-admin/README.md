@@ -42,7 +42,6 @@ npm run build
 │   │   ├── organisms/      # 주요 UI 단위(modal, GNV, table 등)
 │   │   ├── templates/      # 페이지 공통 레이아웃
 │   │   ├── pages/          # 기능별 페이지 (캠페인 관리, 사용자 관리 등)
-│   │   ├── services/       # API 통신 및 데이터 처리 로직
 │   ├── composables/        # 재사용 가능한 VUE Composition API hook
 │   ├── constants/          # 프로젝트 상수값 정리
 │   ├── routes/             # VUE router 정의
