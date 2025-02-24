@@ -1,7 +1,7 @@
 <script setup>
 import {onMounted, reactive, ref, toRefs, watch} from 'vue';
 import GridTable from '@/components/organisms/table/GridTable.vue';
-import {getDateFormat} from '@/utils/functions/useJsUtils.js';
+import { getDateFormat, safeEncodeURIComponent } from '@/utils/functions/useJsUtils.js';
 import UserManageModal from '@/components/pages/admin/user/components/organisms/modal/UserManageModal.vue';
 import {useGlobalModalStore} from '@/store/modules/useGlobalModalStore.js';
 import { useFetchClient } from "@/composables/useFetchClient.js";
@@ -34,21 +34,35 @@ const state = reactive({
 const { list, pagingInfo } = toRefs(state);
 
 
-const fetchUsers = () => {
-  return useFetchClient('/api/users', {
-    method: 'GET',
-    params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
-    immediate: true,
-    onResponse: ({ data }) => {
-      const {content, total_elements} = data.value;
-      state.list = content;
-      state.pagingInfo = {
-        ...state.pagingInfo,
-        totalElements: total_elements,
-      };
-    }
-  });
-}
+// const fetchUsers = () => {
+//   return useFetchClient('/api/users', {
+//     method: 'GET',
+//     params: { page: state.pagingInfo.page, size: state.pagingInfo.size },
+//     immediate: true,
+//     onResponse: ({ data }) => {
+//       const {content, total_elements} = data.value;
+//       state.list = content;
+//       state.pagingInfo = {
+//         ...state.pagingInfo,
+//         totalElements: total_elements,
+//       };
+//     }
+//   });
+// }
+
+const { execute: fetchUsers } = useFetchClient('/api/users', {
+  method: 'GET',
+  params: (() => ({ page: state.pagingInfo.page, size: state.pagingInfo.size })),
+  onResponse: ({ data }) => {
+    const {content, total_elements} = data.value;
+    state.list = content;
+    state.pagingInfo = {
+      ...state.pagingInfo,
+      totalElements: total_elements,
+    };
+  }
+});
+
 const isLoading = ref(false);
 const fetchUsersWithLoading = () => {
   isLoading.value = true;
@@ -72,7 +86,7 @@ const onPageChange = (pageNum) => {
  *  }} SubmitUserReqBody
  */
 /**
- *  @typedef {{ id: number, name: string }} PatchUserReqBody
+ *  @typedef {{ userId: number, name: string }} PatchUserReqBody
  */
 
 const userManageModalState = reactive({
@@ -81,13 +95,13 @@ const userManageModalState = reactive({
   modelValue: /** @type {User.Content} */{},
 })
 const openCreateUserModal = () => {
-  userManageModalState.show = true;
   userManageModalState.type = 'create';
+  userManageModalState.show = true;
 };
 const openEditUserModal = (rowIndex) => {
-  userManageModalState.show = true;
   userManageModalState.type = 'edit';
   userManageModalState.modelValue = state.list[rowIndex];
+  userManageModalState.show = true;
 };
 const closeUserManageModal = () => {
   userManageModalState.show = false;
@@ -119,9 +133,9 @@ const submitUser = async (payload) => {
  *  @param {PatchUserReqBody} payload
  */
 const patchUser = async (payload) => {
-  const { id, ...body } = payload;
+  const { userId: id, ...body } = payload;
 
-  return useFetchClient(`/api/users/${id}`, {
+  return useFetchClient(`/api/users/${safeEncodeURIComponent(id)}`, {
     method: 'PATCH',
     body,
     immediate: true,

@@ -1,6 +1,11 @@
 <script setup>
 import {nextTick, reactive, ref, toRefs, watch} from 'vue';
-import {errorHandler, isValidValue, useDebounceTask} from '@/utils/functions/useJsUtils.js';
+import {
+  errorHandler,
+  isValidValue,
+  safeEncodeURIComponent,
+  useDebounceTask
+} from '@/utils/functions/useJsUtils.js';
 import {
   USERS_ERROR_CONFIRM_PASSWORD_EMPTY_LABEL,
   USERS_ERROR_CONFIRM_PASSWORD_MISMATCH_LABEL,
@@ -34,10 +39,7 @@ const props = defineProps({
   modelValue: { type: Object, required: false, default: () => ({}) },
 });
 const { show, type, modelValue } = toRefs(props);
-watch(show, () => {
-  form.value = getDefaultForm();
-  errors.value = getDefaultForm();
-})
+
 const emits = defineEmits(['close', 'submit']);
 
 const labelText = {
@@ -82,8 +84,13 @@ const getDefaultForm = (payload = /** @type {User.Content} */{}) => {
 const form = ref(getDefaultForm());
 const errors = ref(getDefaultForm());
 
-watch(modelValue, (newValue) => {
-  form.value = getDefaultForm(newValue);
+watch([show, modelValue], ([newShow, newValue]) => {
+  if (newShow) {
+    form.value = getDefaultForm(type.value === 'create' ? undefined : newValue);
+  } else {
+    form.value = getDefaultForm();
+  }
+  errors.value = getDefaultForm();
 });
 
 const onInputAndValidateEmail = (event) => {
@@ -96,18 +103,11 @@ const onInputAndValidateEmail = (event) => {
   checkExistsEmail(targetValue);
 };
 
-const checkExistsEmail = useDebounceTask((email) => {
-  if (!isValidValue(email)) {
-    errors.value.userId = '';
-    return;
-  }
-  if (!new RegExp(USERS_VALID_EMAIL_REGEX).test(email)) {
-    errors.value.userId = USERS_ERROR_EMAIL_INVALID_LABEL;
-    return;
-  }
-  return useFetchClient(`/api/users/${email}/exists`, {
+const checkTargetEmail = ref('');
+const { execute: fetchExistsUser } = useFetchClient(
+  () => `/api/users/${safeEncodeURIComponent(checkTargetEmail.value)}/exists`,
+  {
     method: 'GET',
-    immediate: true,
     onResponse: ({ data }) => {
       if (!data.value.result) {
         errors.value.userId = '';
@@ -122,6 +122,34 @@ const checkExistsEmail = useDebounceTask((email) => {
       });
     }
   });
+const checkExistsEmail = useDebounceTask((email) => {
+  if (!isValidValue(email)) {
+    errors.value.userId = '';
+    return;
+  }
+  if (!new RegExp(USERS_VALID_EMAIL_REGEX).test(email)) {
+    errors.value.userId = USERS_ERROR_EMAIL_INVALID_LABEL;
+    return;
+  }
+  checkTargetEmail.value = email;
+  return fetchExistsUser();
+  // return useFetchClient(`/api/users/${email}/exists`, {
+  //   method: 'GET',
+  //   immediate: true,
+  //   onResponse: ({ data }) => {
+  //     if (!data.value.result) {
+  //       errors.value.userId = '';
+  //       return;
+  //     }
+  //     errors.value.userId = USERS_ERROR_EMAIL_ALREADY_EXISTS_LABEL;
+  //   },
+  //   onError: () => {
+  //     nextTick(() => {
+  //       // 포커스를 쥐고 있을테니 풀어줌
+  //       formRefs.userIdRef.blur();
+  //     });
+  //   }
+  // });
 }, 300);
 
 
