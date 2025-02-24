@@ -1,11 +1,11 @@
-import { ref, toValue } from 'vue';
+import { computed, ref, toValue } from 'vue';
 import { useConcurrentTasks } from '@/composables/useConcurrentTasks.js';
 import { ResultWrapperFactory } from '@/utils/factory/ResultWrapperFactory.js';
 import { requestInterceptor, responseInterceptor } from '@/utils/http/fetchInterceptor.js';
 import { isValidValue } from '@/utils/functions/useJsUtils.js';
 import { useGlobalModalStore } from '@/store/modules/useGlobalModalStore.js';
 
-export function useFetchClient(url, options = {}) {
+export function useFetchClient(targetUrl, options = {}) {
   const { openErrorModal } = useGlobalModalStore();
 
   const data = ref(null);
@@ -25,18 +25,29 @@ export function useFetchClient(url, options = {}) {
   const isFinished = ref(false);
   const isFetching = ref(false);
 
-  const config = requestInterceptor(toValue(url), otherOption);
+  const config = computed(() => {
+    const { params, body, ...requestInitOptions } = otherOption;
+    const newConfig = requestInitOptions;
+    if (isValidValue(params)) {
+      newConfig.params = toValue(params);
+    }
+    if (isValidValue(body)) {
+      newConfig.body = toValue(body);
+    }
+    return requestInterceptor(toValue(targetUrl), newConfig);
+  });
 
   const execute = useConcurrentTasks(
     () => {
       isFinished.value = false;
       onPreFetch && onPreFetch();
 
-      if (!isValidValue(config) || !isValidValue(config.url)) {
+      if (!isValidValue(config.value) || !isValidValue(config.value.url)) {
         return ResultWrapperFactory.create();
       }
+      const { url, ...otherConfigs } = config.value;
 
-      return fetch(config.url, config)
+      return fetch(url, otherConfigs)
         .then((res) => {
           response.value = res;
           statusCode.value = res.statusCode

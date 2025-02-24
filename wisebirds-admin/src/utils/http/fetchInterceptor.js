@@ -18,16 +18,14 @@ export function requestInterceptor(url, config) {
     'Content-Type': 'application/json',
   };
 
-  // GET 요청의 경우 query string 이 필요하므로 보간해준다.
-  if (newConfig.method === 'GET') {
-    const newUrl = new URL(`${protocol}${baseUrl}${port}${url.startsWith('/') ? url : '/' + url}`);
-    if (newConfig.params) {
-      Object.entries(newConfig.params).forEach(([key, value]) => {
-        newUrl.searchParams.append(key, JSON.stringify(value));
-      });
-    }
-    newConfig.url = newUrl.toString();
+  const newUrl = new URL(`${protocol}${baseUrl}${port}${url.startsWith('/') ? url : '/' + url}`);
+  // params 가 있는 요청의 경우 query string 이 필요하므로 보간해준다.
+  if (newConfig.params) {
+    Object.entries(newConfig.params).forEach(([key, value]) => {
+      newUrl.searchParams.append(key, JSON.stringify(value));
+    });
   }
+  newConfig.url = newUrl.toString();
 
   if (
     !(newConfig.body instanceof Blob ||
