@@ -3,7 +3,7 @@ import {computed} from 'vue';
 
 const props = defineProps({
   // 기본 원형 스피너
-  type: { type: [ () => 'circle', () => 'bar', () => 'dots', () => 'jump' ], required: false, default: 'circle' },
+  type: { type: [ String, () => 'circle', () => 'bar', () => 'dots', () => 'jump' ], required: false, default: 'circle' },
   size: { type: Number, required: false, default: 40 }, // 크기 설정
   color: { type: String, required: false, default: '#3498db' }, // 색상 설정
   fixed: { type: Boolean, required: false, default: true }, // 페이지 중앙 고정 여부 (기본값: true)

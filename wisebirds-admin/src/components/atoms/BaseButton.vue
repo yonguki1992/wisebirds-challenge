@@ -2,7 +2,7 @@
 import {onMounted, ref, toRefs} from 'vue';
 
 const props = defineProps({
-  type: { type: [ () => 'submit', () => 'button', () => 'reset' ], required: false, default: 'submit' },
+  type: { type: [ String, () => 'submit', () => 'button', () => 'reset' ], required: false, default: 'submit' },
 });
 const { type } = toRefs(props);
 
